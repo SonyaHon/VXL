@@ -291,8 +291,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0.08598814, y: -0.89893717, z: 0.20461047, w: -0.3776938}
+  m_LocalPosition: {x: -113.169586, y: 40.941124, z: 130.36703}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -327,6 +327,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40131fd653804105844ba0742d39b83a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  noiseSettingsFoldout: 1
+  noiseSettings: {fileID: 11400000, guid: 9ed7974aa67e6412ab93c957c4024282, type: 2}
 --- !u!4 &1484188547
 Transform:
   m_ObjectHideFlags: 0

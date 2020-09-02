@@ -4,44 +4,78 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
-    private GameObject _worldTransform;
-    private List<Chunk> loaded_chunks;
+  private GameObject _worldTransform;
+  private List<Chunk> loaded_chunks;
 
-    private void Start()
+  [HideInInspector]
+  public bool noiseSettingsFoldout = true;
+  public NoiseSettings noiseSettings;
+
+  private void Start()
+  {
+    _worldTransform = new GameObject("World Transform");
+    _worldTransform.transform.parent = transform;
+
+    InitializeLoadedChunks();
+    UpdateLoadedChunks();
+  }
+
+  private void ClearLoadedChunks()
+  {
+    if (loaded_chunks == null) return;
+
+    loaded_chunks.Clear();
+
+    foreach (Transform child in _worldTransform.transform)
     {
-        _worldTransform = new GameObject("World Transform");
-        _worldTransform.transform.parent = transform;
-        
-        InitializeLoadedChunks();
-        UpdateLoadedChunks();
+      GameObject.Destroy(child.gameObject);
+    }
+  }
+
+  private void InitializeLoadedChunks()
+  {
+    if (loaded_chunks == null)
+    {
+      loaded_chunks = new List<Chunk>();
     }
 
-    private void InitializeLoadedChunks()
+    for (int x = -VXL.instance.RENDER_DISTANCE; x <= VXL.instance.RENDER_DISTANCE; x++)
     {
-        loaded_chunks = new List<Chunk>();
-
-        for (int i = 0; i < 1; i++)
+      for (int y = -VXL.instance.RENDER_DISTANCE; y <= VXL.instance.RENDER_DISTANCE; y++)
+      {
+        if (x * x + y * y <= VXL.instance.RENDER_DISTANCE * VXL.instance.RENDER_DISTANCE)
         {
-            Chunk chunk = new Chunk(Vector2.zero);
-            chunk.Generate();
-            loaded_chunks.Add(chunk);
+          Chunk chunk = new Chunk(new Vector2(x, y));
+          chunk.Generate(noiseSettings);
+          loaded_chunks.Add(chunk);
         }
+      }
     }
+  }
 
-	/**
+  /**
 	* This is needed to rebuild entire loaded chunks
-	* would be heavy. 
+	* would be heavy. While in the game this should be called only when 
+    * teleported etc.
 	**/
-    private void UpdateLoadedChunks()
+  private void UpdateLoadedChunks()
+  {
+    foreach (Transform child in _worldTransform.transform)
     {
-        foreach (Transform child in _worldTransform.transform)
-        {
-            GameObject.Destroy(child.gameObject);
-        }
-
-        foreach (Chunk loadedChunk in loaded_chunks)
-        {
-            loadedChunk.GameObject.transform.parent = _worldTransform.transform;
-        } 
+      GameObject.Destroy(child.gameObject);
     }
+
+    foreach (Chunk loadedChunk in loaded_chunks)
+    {
+      loadedChunk.GameObject.transform.parent = _worldTransform.transform;
+    }
+  }
+
+
+  public void DebugRegenerate()
+  {
+    ClearLoadedChunks();
+    InitializeLoadedChunks();
+    UpdateLoadedChunks();
+  }
 }
