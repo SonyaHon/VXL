@@ -11,4 +11,14 @@
   public float NOISE_ROGHFNESS = 0.2f;
   public int MAX_FLOOR_HEIGHT = 10;
   public float UNITY_NOISE_OFFSET = 999999.0f;
+
+  public Player player;
+
+  public void SetPlayer(Player _player)
+  {
+    if (player == null)
+    {
+      player = _player;
+    }
+  }
 }
