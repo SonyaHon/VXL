@@ -11,6 +11,8 @@ public class World : MonoBehaviour
   public bool noiseSettingsFoldout = true;
   public NoiseSettings noiseSettings;
 
+  public int renderDistance = 15;
+
   private void Start()
   {
     _worldTransform = new GameObject("World Transform");
@@ -39,14 +41,14 @@ public class World : MonoBehaviour
       loaded_chunks = new List<Chunk>();
     }
 
-    for (int x = -VXL.instance.RENDER_DISTANCE; x <= VXL.instance.RENDER_DISTANCE; x++)
+    for (int x = -renderDistance; x <= renderDistance; x++)
     {
-      for (int y = -VXL.instance.RENDER_DISTANCE; y <= VXL.instance.RENDER_DISTANCE; y++)
+      for (int y = -renderDistance; y <= renderDistance; y++)
       {
-        if (x * x + y * y <= VXL.instance.RENDER_DISTANCE * VXL.instance.RENDER_DISTANCE)
+        if (x * x + y * y <= renderDistance * renderDistance)
         {
-          Chunk chunk = new Chunk(new Vector2(x, y));
-          chunk.Generate(noiseSettings);
+          Chunk chunk = new Chunk(new Vector2(x, y), noiseSettings);
+          chunk.Generate();
           loaded_chunks.Add(chunk);
         }
       }

@@ -5,8 +5,9 @@ public class Chunk
 {
   private GameObject _gameObject;
   private Vector2 _position;
+  private NoiseSettings _settings;
 
-  public Chunk(Vector2 position)
+  public Chunk(Vector2 position, NoiseSettings settings)
   {
     _gameObject = new GameObject($"Chunk {position.x}:{position.y}");
     _gameObject.AddComponent<MeshFilter>();
@@ -14,12 +15,13 @@ public class Chunk
     _gameObject.AddComponent<MeshCollider>();
 
     _position = position;
-    _gameObject.transform.position = new Vector3(position.x * VXL.instance.CHUNK_SIZE, 0, position.y * VXL.instance.CHUNK_SIZE);
+    _settings = settings;
+    _gameObject.transform.position = new Vector3(position.x * _settings.chunkSize, 0, position.y * _settings.chunkSize);
   }
 
-  public void Generate(NoiseSettings settings)
+  public void Generate()
   {
-    float[,] heightMap = GenerateHeightMap(settings);
+    float[,] heightMap = GenerateHeightMap();
 
     List<Vector3> verts = new List<Vector3>();
     List<int> indices = new List<int>();
@@ -54,36 +56,36 @@ public class Chunk
 
         lastQuadStartingPoint += 4;
 
-        if (settings.drawDebugPoints)
+        if (_settings.drawDebugPoints)
         {
-          GameObject debugPoint = GameObject.Instantiate(settings.pointPrefab);
+          GameObject debugPoint = GameObject.Instantiate(_settings.pointPrefab);
           debugPoint.name = $"Debug Point {x}:{y}";
           debugPoint.transform.position = centerPoint;
           debugPoint.transform.localScale = new Vector3(.2f, .2f, .2f);
           debugPoint.transform.parent = _gameObject.transform;
         }
 
-        if (settings.drawDebugCorners)
+        if (_settings.drawDebugCorners)
         {
-          GameObject debugPoint = GameObject.Instantiate(settings.pointPrefab);
+          GameObject debugPoint = GameObject.Instantiate(_settings.pointPrefab);
           debugPoint.name = $"Debug Corner {x}:{y}:0";
           debugPoint.transform.position = centerPoint + new Vector3(-.5f, 0, .5f);
           debugPoint.transform.parent = _gameObject.transform;
 
 
-          GameObject debugPoint2 = GameObject.Instantiate(settings.pointPrefab);
+          GameObject debugPoint2 = GameObject.Instantiate(_settings.pointPrefab);
           debugPoint2.name = $"Debug Corner {x}:{y}:1";
           debugPoint2.transform.position = centerPoint + new Vector3(.5f, 0, .5f);
           debugPoint2.transform.parent = _gameObject.transform;
 
 
-          GameObject debugPoint3 = GameObject.Instantiate(settings.pointPrefab);
+          GameObject debugPoint3 = GameObject.Instantiate(_settings.pointPrefab);
           debugPoint3.name = $"Debug Corner {x}:{y}:2";
           debugPoint3.transform.position = centerPoint + new Vector3(-.5f, 0, -.5f);
           debugPoint3.transform.parent = _gameObject.transform;
 
 
-          GameObject debugPoint4 = GameObject.Instantiate(settings.pointPrefab);
+          GameObject debugPoint4 = GameObject.Instantiate(_settings.pointPrefab);
           debugPoint4.name = $"Debug Corner {x}:{y}:3";
           debugPoint4.transform.position = centerPoint + new Vector3(.5f, 0, -.5f);
           debugPoint4.transform.parent = _gameObject.transform;
@@ -99,7 +101,7 @@ public class Chunk
       {
         // current quad height
         float currentQuadHeight = heightMap[y, x];
-        int currentQuadFirstPoint = (x + y * VXL.instance.CHUNK_SIZE) * 4;
+        int currentQuadFirstPoint = (x + y * _settings.chunkSize) * 4;
         Vector3[] currentQuad = new[]
         {
                     verts[currentQuadFirstPoint],
@@ -111,7 +113,7 @@ public class Chunk
         if (y != heightMap.GetLength(0) - 1 && x != heightMap.GetLength(1) - 1)
         {
           float rightQuadHeight = heightMap[y, x + 1];
-          int rightQuadFirstPoint = (x + 1 + y * VXL.instance.CHUNK_SIZE) * 4;
+          int rightQuadFirstPoint = (x + 1 + y * _settings.chunkSize) * 4;
           Vector3[] rightQuad = new[]
           {
                         verts[rightQuadFirstPoint],
@@ -144,7 +146,7 @@ public class Chunk
           }
 
           float bottomQuadHeight = heightMap[y + 1, x];
-          int bottomQuadFirstPoint = (x + (y + 1) * VXL.instance.CHUNK_SIZE) * 4;
+          int bottomQuadFirstPoint = (x + (y + 1) * _settings.chunkSize) * 4;
           Vector3[] bottomQuad = new[]
           {
                         verts[bottomQuadFirstPoint],
@@ -176,10 +178,10 @@ public class Chunk
             vertexOffset += 4;
           }
         }
-        else if (y == VXL.instance.CHUNK_SIZE - 1 && x != VXL.instance.CHUNK_SIZE - 1)
+        else if (y == _settings.chunkSize - 1 && x != _settings.chunkSize - 1)
         {
           float rightQuadHeight = heightMap[y, x + 1];
-          int rightQuadFirstPoint = (x + 1 + y * VXL.instance.CHUNK_SIZE) * 4;
+          int rightQuadFirstPoint = (x + 1 + y * _settings.chunkSize) * 4;
           Vector3[] rightQuad = new[]
           {
                         verts[rightQuadFirstPoint],
@@ -211,10 +213,10 @@ public class Chunk
             vertexOffset += 4;
           }
         }
-        else if (y != VXL.instance.CHUNK_SIZE - 1 && x == VXL.instance.CHUNK_SIZE - 1)
+        else if (y != _settings.chunkSize - 1 && x == _settings.chunkSize - 1)
         {
           float bottomQuadHeight = heightMap[y + 1, x];
-          int bottomQuadFirstPoint = (x + (y + 1) * VXL.instance.CHUNK_SIZE) * 4;
+          int bottomQuadFirstPoint = (x + (y + 1) * _settings.chunkSize) * 4;
           Vector3[] bottomQuad = new[]
           {
                         verts[bottomQuadFirstPoint],
@@ -260,46 +262,43 @@ public class Chunk
     _gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
   }
 
-  private float[,] GenerateHeightMap(NoiseSettings settings)
+  private float[,] GenerateHeightMap()
   {
-    float[,] heightMap = new float[VXL.instance.CHUNK_SIZE, VXL.instance.CHUNK_SIZE];
+    float[,] heightMap = new float[_settings.chunkSize, _settings.chunkSize];
 
-    for (int y = 0; y < VXL.instance.CHUNK_SIZE; y++)
+    for (int y = 0; y < _settings.chunkSize; y++)
     {
-      for (int x = 0; x < VXL.instance.CHUNK_SIZE; x++)
+      for (int x = 0; x < _settings.chunkSize; x++)
       {
-        heightMap[y, x] = GetElevationForPoint(x, y, settings);
+        heightMap[y, x] = GetElevationForPoint(x, y);
       }
     }
 
     return heightMap;
   }
 
-  private float GetElevationForPoint(int x, int y, NoiseSettings settings)
+  private float GetElevationForPoint(int x, int y)
   {
-    float baseOffset = VXL.instance.UNITY_NOISE_OFFSET;
-    float baseFrequency = settings.baseFrequency;
-    float basePersistance = settings.basePersistance;
+    float baseOffset = _settings.unityNoiseOffset;
+    float baseFrequency = _settings.baseFrequency;
+    float basePersistance = _settings.basePersistance;
     float elevation = 0;
 
-    for (int i = 0; i < settings.octaves; i++)
+    for (int i = 0; i < _settings.octaves; i++)
     {
 
-      //   float xSample = baseOffset + _position.x * VXL.instance.CHUNK_SIZE + x * baseFrequency;
-      //   float ySample = baseOffset + _position.y * VXL.instance.CHUNK_SIZE + y * baseFrequency;
-
-      float xSample = baseOffset + _position.x * VXL.instance.CHUNK_SIZE + x;
-      float ySample = baseOffset + _position.y * VXL.instance.CHUNK_SIZE + y;
+      float xSample = baseOffset + _position.x * _settings.chunkSize + x;
+      float ySample = baseOffset + _position.y * _settings.chunkSize + y;
 
       elevation += basePersistance * Mathf.PerlinNoise(xSample * baseFrequency, ySample * baseFrequency);
 
-      baseFrequency *= settings.frequencyMultiplier;
-      basePersistance *= settings.basePersistance;
+      baseFrequency *= _settings.frequencyMultiplier;
+      basePersistance *= _settings.basePersistance;
     }
 
-    elevation = Mathf.Pow(elevation, settings.pow);
+    elevation = Mathf.Pow(elevation, _settings.pow);
 
-    if (settings.useRounding)
+    if (_settings.useRounding)
     {
       elevation = Mathf.Round(elevation);
     }
@@ -310,6 +309,5 @@ public class Chunk
   public GameObject GameObject
   {
     get => _gameObject;
-    set => _gameObject = value;
   }
 }

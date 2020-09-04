@@ -6,6 +6,10 @@ using UnityEngine;
 [CreateAssetMenu()]
 public class NoiseSettings : ScriptableObject
 {
+
+  public int chunkSize = 16;
+  public float unityNoiseOffset = 999999.9f;
+
   public float baseFrequency = 3.0f;
   public float frequencyMultiplier = 2.0f;
 
@@ -23,6 +27,7 @@ public class NoiseSettings : ScriptableObject
 
   public bool drawDebugPoints = false;
   public bool drawDebugCorners = false;
+
 
   [SerializeField]
   public GameObject pointPrefab;
