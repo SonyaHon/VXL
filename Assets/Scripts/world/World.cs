@@ -22,6 +22,19 @@ public class World : MonoBehaviour
     UpdateLoadedChunks();
   }
 
+  private void Update()
+  {
+    // get player position
+    Player player = VXL.instance.player;
+    if (player == null) return;
+    Vector2 playerPos = new Vector2(player.transform.position.x, player.transform.position.z);
+
+    // get player in chunk position
+    Vector2 playerChunkPos = playerPos /= noiseSettings.chunkSize;
+
+    Debug.Log(playerChunkPos);
+  }
+
   private void ClearLoadedChunks()
   {
     if (loaded_chunks == null) return;
@@ -58,7 +71,7 @@ public class World : MonoBehaviour
   /**
 	* This is needed to rebuild entire loaded chunks
 	* would be heavy. While in the game this should be called only when 
-    * teleported etc.
+  * teleported etc.
 	**/
   private void UpdateLoadedChunks()
   {
